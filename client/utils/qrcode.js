@@ -81,16 +81,14 @@ export function onQrCodeScan(imageBuffer, cartStore) {
   return new Promise((resolve/*, reject*/) => {
 
     // BEGIN MAIN THREAD SOLUTION
-    let qr = new QrCode();
-    qr.callback = function(error, rawResult) {
-      if(error) {
-        self.postMessage({ error });
-        return;
-      }
-      let result = qrCodeStringToObject(rawResult.result);
-      resolve(result);
+    let worker = new Worker('qrWorker.js');
+    worker.postMessage({image: imageBuffer, resolve});
+    console.log('App sent')
+
+    worker.onMessage = (e) => {
+      console.log("got it", e)
     }
-    qr.decode(imageBuffer);
+
     // END MAIN THREAD SOLUTION
     
   }).then((qrData) => {
